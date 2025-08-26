@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Turno - Dra. Anahí Versace</title>
+  <title>Turno</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     body {
@@ -13,7 +13,7 @@
       text-align: center;
     }
 
-    input, button {
+    input, button, select {
       padding: 10px;
       margin: 10px;
       font-size: 16px;
@@ -88,12 +88,17 @@
 </head>
 <body>
 
-  <h1>Turno con la Dra. Anahí Versace</h1>
+  <h1>Turno AV</h1>
   <h1>Puerto Madero</h1>
 
-  <input type="text" id="nombrePaciente" placeholder="Nombre del paciente"><br>
+  <!-- Nuevo selector de profesional -->
+  <label for="profesional">Profesional:</label>
+  <select id="profesional">
+    <option value="Dra. Anahí Versace">Dra. Anahí Versace</option>
+    <option value="Majo">Majo</option>
+  </select><br>
 
-  <!-- Corregido el ID (antes era TelefonoPaciente con T mayúscula) -->
+  <input type="text" id="nombrePaciente" placeholder="Nombre del paciente"><br>
   <input type="text" id="telefonoPaciente" placeholder="Teléfono del paciente"><br>
 
   <label>Tratamiento(s):</label>
@@ -120,7 +125,7 @@
   <div id="ticket">
     <h2>Turno Confirmado</h2>
     <h2>Gracias por confiar en nosotros Clínica Estética AV</h2>
-    <p><strong>Profesional:</strong> Dra. Anahí Versace</p>
+    <p><strong>Profesional:</strong> <span id="ticketProfesional"></span></p>
     <p><strong>Paciente:</strong> <span id="ticketNombre"></span></p>
     <p><strong>Teléfono:</strong> <span id="ticketTelefono"></span></p>
     <p><strong>Tratamiento(s):</strong> <span id="ticketTratamiento"></span></p>
@@ -135,7 +140,6 @@
   <script>
     let datosTurno = {};
 
-    // Activar selección de etiquetas
     document.querySelectorAll('.tag').forEach(tag => {
       tag.addEventListener('click', () => {
         tag.classList.toggle('selected');
@@ -143,6 +147,7 @@
     });
 
     function generarTicket() {
+      const profesional = document.getElementById("profesional").value;
       const nombre = document.getElementById("nombrePaciente").value.trim();
       const telefono = document.getElementById("telefonoPaciente").value.trim();
       const fecha = document.getElementById("fecha").value;
@@ -163,6 +168,7 @@
 
       const tratamientoTexto = tratamientos.join(', ');
 
+      document.getElementById("ticketProfesional").innerText = profesional;
       document.getElementById("ticketNombre").innerText = nombre;
       document.getElementById("ticketTelefono").innerText = telefono;
       document.getElementById("ticketTratamiento").innerText = tratamientoTexto;
@@ -173,22 +179,21 @@
       document.getElementById("downloadBtn").style.display = "inline-block";
       document.getElementById("calendarBtn").style.display = "inline-block";
 
-      datosTurno = { nombre, telefono, tratamientoTexto, fecha, hora };
+      datosTurno = { profesional, nombre, telefono, tratamientoTexto, fecha, hora };
     }
 
     function descargarTicket() {
       const ticket = document.getElementById("ticket");
       html2canvas(ticket).then(canvas => {
         const link = document.createElement("a");
-        link.download = "Turno_Dra_Anahi_Versace.jpg";
+        link.download = "Turno.jpg";
         link.href = canvas.toDataURL("image/jpeg");
         link.click();
       });
     }
 
     function agregarAGoogleCalendar() {
-      // Ahora también extraemos tratamientoTexto
-      const { nombre, telefono, fecha, hora, tratamientoTexto } = datosTurno;
+      const { profesional, nombre, telefono, fecha, hora, tratamientoTexto } = datosTurno;
 
       const startDateTime = new Date(`${fecha}T${hora}`);
       const endDateTime = new Date(startDateTime.getTime() + 30 * 60000);
@@ -200,9 +205,9 @@
       const start = formatDate(startDateTime);
       const end = formatDate(endDateTime);
 
-      const title = encodeURIComponent(`Turno con Dra. Anahí Versace`);
+      const title = encodeURIComponent(`Turno con ${profesional}`);
       const details = encodeURIComponent(`Paciente: ${nombre}\nTeléfono: ${telefono}\nTratamientos: ${tratamientoTexto}`);
-      const location = encodeURIComponent("Clínica Estética - Dra. Anahí Versace");
+      const location = encodeURIComponent(`Clínica Estética - ${profesional}`);
       const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
 
       window.open(url, "_blank");
@@ -211,4 +216,5 @@
 
 </body>
 </html>
+
 
