@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Turno - Dra. Anahí Versace</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #efb810;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+      background: #222;
+      color: #fff;
+      border: 1px solid #555;
+    }
+
+    textarea {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+      background: #222;
+      color: #fff;
+      border: 1px solid #555;
+      width: 150px;
+      max-width: 400px;
+    }
+
+    input[type="date"],
+    input[type="time"] {
+      background-color: #fff;
+      color: #000;
+    }
+
+    .tags-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .tag {
+      background: #444;
+      padding: 10px 15px;
+      border-radius: 20px;
+      border: 1px solid #888;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .tag.selected {
+      background: #0a84ff;
+      color: #fff;
+      border-color: #0a84ff;
+      transform: scale(1.05);
+    }
+
+    #ticket {
+      margin-top: 20px;
+      background: #c9d60e;
+      border: 2px dashed #888;
+      padding: 20px;
+      display: none;
+      text-align: center;
+      width: 300px;
+      box-shadow: 0 4px 10px rgba(255,255,255,0.1);
+      color: #fff;
+    }
+
+    #ticket h2 {
+      margin-top: 10px;
+      color: #fff;
+    }
+
+    #downloadBtn, #calendarBtn {
+      margin-top: 20px;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Turno con la Dra. Anahí Versace</h1>
+  <h1>Puerto Madero</h1>
+
+  <input type="text" id="nombrePaciente" placeholder="Nombre del paciente"><br>
+
+  <!-- Corregido el ID (antes era TelefonoPaciente con T mayúscula) -->
+  <input type="text" id="telefonoPaciente" placeholder="Teléfono del paciente"><br>
+
+  <label>Tratamiento(s):</label>
+  <div class="tags-container" id="tratamientos">
+    <div class="tag" data-value="Botox">Botox</div>
+    <div class="tag" data-value="Rinoplastia">Rinomodelación</div>
+    <div class="tag" data-value="Labios">Labios</div>
+    <div class="tag" data-value="Hilos">Hilos</div>
+    <div class="tag" data-value="Chip">Chip Sexual</div>
+    <div class="tag" data-value="Mela">Mela</div>
+    <div class="tag" data-value="Tatuajes">Tatuajes</div>
+  </div>
+
+  <input type="text" id="otroTratamiento" placeholder="Otro tratamiento/descrip."><br>
+
+  <label for="fecha">Fecha:</label>
+  <input type="date" id="fecha"><br>
+
+  <label for="hora">Hora:</label>
+  <input type="time" id="hora"><br>
+
+  <button onclick="generarTicket()">Generar Ticket</button>
+
+  <div id="ticket">
+    <h2>Turno Confirmado</h2>
+    <h2>Gracias por confiar en nosotros Clínica Estética AV</h2>
+    <p><strong>Profesional:</strong> Dra. Anahí Versace</p>
+    <p><strong>Paciente:</strong> <span id="ticketNombre"></span></p>
+    <p><strong>Teléfono:</strong> <span id="ticketTelefono"></span></p>
+    <p><strong>Tratamiento(s):</strong> <span id="ticketTratamiento"></span></p>
+    <p><strong>Fecha:</strong> <span id="ticketFecha"></span></p>
+    <p><strong>Hora:</strong> <span id="ticketHora"></span></p>
+    <p><strong>Dirección:</strong> Olga Cossenttini 1691 depto.211 Puerto Madero</p>
+  </div>
+
+  <button id="downloadBtn" style="display:none;" onclick="descargarTicket()">Descargar Ticket (JPG)</button>
+  <button id="calendarBtn" style="display:none;" onclick="agregarAGoogleCalendar()">Agregar a Google Calendar</button>
+
+  <script>
+    let datosTurno = {};
+
+    // Activar selección de etiquetas
+    document.querySelectorAll('.tag').forEach(tag => {
+      tag.addEventListener('click', () => {
+        tag.classList.toggle('selected');
+      });
+    });
+
+    function generarTicket() {
+      const nombre = document.getElementById("nombrePaciente").value.trim();
+      const telefono = document.getElementById("telefonoPaciente").value.trim();
+      const fecha = document.getElementById("fecha").value;
+      const hora = document.getElementById("hora").value;
+      const otro = document.getElementById("otroTratamiento").value.trim();
+
+      const selectedTags = Array.from(document.querySelectorAll('.tag.selected'));
+      const tratamientos = selectedTags.map(tag => tag.getAttribute('data-value'));
+
+      if (otro) {
+        tratamientos.push(otro);
+      }
+
+      if (!nombre || !telefono || !fecha || !hora || tratamientos.length === 0) {
+        alert("Por favor complete todos los campos y seleccione al menos un tratamiento.");
+        return;
+      }
+
+      const tratamientoTexto = tratamientos.join(', ');
+
+      document.getElementById("ticketNombre").innerText = nombre;
+      document.getElementById("ticketTelefono").innerText = telefono;
+      document.getElementById("ticketTratamiento").innerText = tratamientoTexto;
+      document.getElementById("ticketFecha").innerText = fecha;
+      document.getElementById("ticketHora").innerText = hora;
+
+      document.getElementById("ticket").style.display = "inline-block";
+      document.getElementById("downloadBtn").style.display = "inline-block";
+      document.getElementById("calendarBtn").style.display = "inline-block";
+
+      datosTurno = { nombre, telefono, tratamientoTexto, fecha, hora };
+    }
+
+    function descargarTicket() {
+      const ticket = document.getElementById("ticket");
+      html2canvas(ticket).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "Turno_Dra_Anahi_Versace.jpg";
+        link.href = canvas.toDataURL("image/jpeg");
+        link.click();
+      });
+    }
+
+    function agregarAGoogleCalendar() {
+      // Ahora también extraemos tratamientoTexto
+      const { nombre, telefono, fecha, hora, tratamientoTexto } = datosTurno;
+
+      const startDateTime = new Date(`${fecha}T${hora}`);
+      const endDateTime = new Date(startDateTime.getTime() + 30 * 60000);
+
+      const formatDate = (d) => {
+        return d.toISOString().replace(/-|:|\.\d{3}/g, "");
+      };
+
+      const start = formatDate(startDateTime);
+      const end = formatDate(endDateTime);
+
+      const title = encodeURIComponent(`Turno con Dra. Anahí Versace`);
+      const details = encodeURIComponent(`Paciente: ${nombre}\nTeléfono: ${telefono}\nTratamientos: ${tratamientoTexto}`);
+      const location = encodeURIComponent("Clínica Estética - Dra. Anahí Versace");
+      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
+
+      window.open(url, "_blank");
+    }
+  </script>
+
+</body>
+</html>
+
